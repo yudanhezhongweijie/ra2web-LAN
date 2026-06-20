@@ -46,4 +46,46 @@ fork该项目，命名为 你的名字.github.io，例如 ra2web.github.io
 
 [![一键部署到Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/ra2web/ra2web.github.io)
 
+## LAN / self-hosted setup
+
+This fork points the client at a self-hosted LAN server (see `config.ini` and
+`servers.ini`, which target `http://127.0.0.1:8054`).
+
+The game resource archive `Red-Alert-2-Multiplayer.exe` (~197 MB) is **not**
+committed to this repo because it exceeds GitHub's 100 MB file limit. Download it
+separately and have the LAN server serve it:
+
+1. Download the archive:
+   https://archive.org/download/red-alert-2-multiplayer/Red-Alert-2-Multiplayer.exe
+2. Place `Red-Alert-2-Multiplayer.exe` where the LAN server serves static files so
+   it is reachable at `http://127.0.0.1:8054/Red-Alert-2-Multiplayer.exe`
+   (this matches `gameResArchiveUrl` in `config.ini`).
+3. Start the LAN server, then load the client.
+
+### Game resource assets (`v2/`)
+
+The `v2/*.mix`, `v2/*.png`, and `v2/*.mp4` game-data files are likewise **not**
+committed (they total ~150 MB). They are listed in `v2/manifest.json` and served by
+the LAN server the same way as the `.exe`: keep them on disk in `v2/` so the server
+hands them out at `http://127.0.0.1:8054/v2/...`. Run the LAN server with
+`CLIENT_DIR` pointed at this directory and the client loads them automatically.
+
+#### Where to download the assets
+
+If your `v2/` directory is empty (fresh checkout), repopulate it from the upstream
+RA2WEB sources — either path works:
+
+- **Pre-extracted CDN (matches `v2/manifest.json`):** download `manifest.json` and
+  each listed file from the upstream gameres CDN:
+  - primary: `https://stdres.wangerhuoda.cn/` (e.g. `https://stdres.wangerhuoda.cn/anims.mix`)
+  - backup: `https://wyhjres2.bun.sh.cn/`
+- **Full resource pack:** `https://download.ra2web.com/full-pack.7z` — a single 7z
+  archive of all resources; extract the `.mix`/`.png`/`.mp4` files into `v2/`.
+- **Game archive:** the `Red-Alert-2-Multiplayer.exe` above also contains these
+  assets; the client can extract them via its import dialog when
+  `gameResArchiveUrl` is set and `autoLoadGameRes` is off.
+
+Place the files in `v2/` (and `v2/ls/` for the `ls800*.png` loading screens) so the
+LAN server serves them at `http://127.0.0.1:8054/v2/...`.
+
 
