@@ -21,14 +21,37 @@ across branches/updates and silently reintroduced old bugs.
 # RA2 (stock — no patches):
 node tools/patch-client.mjs --variant=ra2  --bundle assets/releases/<ver>/werhd.min.js
 
-# Yuri's Revenge (engine swap + checksum bypass + drop expandmd01):
+# Yuri's Revenge — static swap (engine→YR + checksum bypass + drop expandmd01):
 node tools/patch-client.mjs --variant=yuri --bundle assets/releases/<ver>/werhd.min.js
+
+# DUAL ENGINE — one bundle runs BOTH (RA2 default, ?engine=yr / cdEngine=yr for Yuri):
+node tools/patch-client.mjs --variant=dual --bundle assets/releases/<ver>/werhd.min.js
 ```
 
 - First run snapshots the current bundle to `<bundle>.stock` (assumes it's pristine
   upstream — make sure it is). Every later run rebuilds **from `.stock`**, so it's
   idempotent: re-running can't double-apply, and switching variants is one command.
-- RA2 vs YR is a **flag**, not two divergent binaries.
+- RA2 / YR / dual is a **flag**, not divergent binaries.
+- The built bundle is a **local artifact** — main commits the *stock* bundle, you build
+  your variant locally. (`.stock` and `*.bak` are gitignored; don't commit the built one.)
+
+## Enabling both engines (dual) on a host
+
+main ships the **stock** bundle. To run both engines from one install:
+
+```bash
+# 1. build the dual bundle (RA2 default, Yuri via ?engine=yr or cdEngine=yr):
+node tools/patch-client.mjs --variant=dual --bundle assets/releases/<ver>/werhd.min.js
+# 2. point asset import at the combined archive (has RA2 base + YR md mixes):
+#    config.ini → gameResArchiveUrl=__LANHTTP__/yr-assets.7z
+# 3. put yr-assets.7z on disk in the client dir (gitignored; the LAN server serves it).
+```
+
+Validated headless: the dual bundle boots BOTH RA2 and YR (engine 4 md mixes load, 0 init
+errors) and a two-client YR match starts and runs in sync. The dual variant does NOT
+include the YR Eva-voice patch (alias-heavy, fragile) — YR plays fine without it; add it
+separately if you want YR EVA voices. `yr-assets.7z` (324 MB) is **never committed** (over
+GitHub's 100 MB limit) — it lives on disk and is served by the LAN server.
 
 ## Reliability: somewhat reliable, NOT 100%
 

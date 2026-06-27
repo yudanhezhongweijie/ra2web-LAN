@@ -59,10 +59,31 @@ const PATCHES = [
   },
   {
     name: "bypass-asset-checksum",
-    variants: ["yuri"],
+    variants: ["yuri", "dual"],
     // Anchor: !<v>.includes(<v>.toString(16).toUpperCase())  → always false.
     find: /!([A-Za-z0-9_$]+)\.includes\(([A-Za-z0-9_$]+)\.toString\(16\)\.toUpperCase\(\)\)/g,
     replace: "!1",
+    expect: 1,
+  },
+  // --- dual-engine variant: one bundle runs BOTH engines ---------------------
+  // RA2 by default; YR when localStorage.cdEngine==="yr" or ?engine=yr. One asset
+  // import (yr-assets.7z) stores both sets. See tools/PATCHING.md.
+  {
+    name: "engine-dual-toggle",
+    variants: ["dual"],
+    // Same anchor as the static yuri swap, but make the engine a runtime choice.
+    find: /setActiveEngine\(([A-Za-z0-9_$]+)\.EngineType\.RedAlert2\)/g,
+    replace:
+      'setActiveEngine((localStorage.getItem("cdEngine")==="yr"||new URLSearchParams(location.search).get("engine")==="yr")?$1.EngineType.YurisRevenge:$1.EngineType.RedAlert2)',
+    expect: 1,
+  },
+  {
+    name: "expandmd-always-import",
+    variants: ["dual"],
+    // The required-files push is guarded by `<alias>.EngineType.YurisRevenge&&`. Drop
+    // the guard so the md mixes (present in yr-assets.7z) import for either engine.
+    find: /[A-Za-z0-9_$]+\.EngineType\.YurisRevenge&&([A-Za-z0-9_$]+\.push\("ra2md\.mix","langmd\.mix","expandmd01\.mix","multimd\.mix"\))/g,
+    replace: "$1",
     expect: 1,
   },
   {
@@ -94,8 +115,8 @@ const variant = arg("variant", "ra2");
 const bundle = arg("bundle", "assets/releases/0.82.9-r8acefdf-d49bbca7f/werhd.min.js");
 const stock = `${bundle}.stock`;
 
-if (!["ra2", "yuri"].includes(variant)) {
-  console.error(`error: --variant must be ra2 or yuri (got "${variant}")`);
+if (!["ra2", "yuri", "dual"].includes(variant)) {
+  console.error(`error: --variant must be ra2, yuri, or dual (got "${variant}")`);
   process.exit(2);
 }
 if (!existsSync(bundle)) {

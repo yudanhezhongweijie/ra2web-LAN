@@ -6,3 +6,8 @@ v2/*.mix
 v2/*.mp4
 v2/*.png
 v2/ls/*.png
+
+# Client patch pipeline: built bundle artifacts + large local assets (served off-disk)
+yr-assets.7z
+*.stock
+assets/releases/*/werhd.min.js.*bak
