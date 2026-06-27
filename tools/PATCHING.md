@@ -18,7 +18,7 @@ across branches/updates and silently reintroduced old bugs.
 ## Usage
 
 ```bash
-# RA2 (stock — no patches):
+# RA2 (engine stock + house-rule lobby defaults — see below):
 node tools/patch-client.mjs --variant=ra2  --bundle assets/releases/<ver>/werhd.min.js
 
 # Yuri's Revenge — static swap (engine→YR + checksum bypass + drop expandmd01):
@@ -52,6 +52,19 @@ errors) and a two-client YR match starts and runs in sync. The dual variant does
 include the YR Eva-voice patch (alias-heavy, fragile) — YR plays fine without it; add it
 separately if you want YR EVA voices. `yr-assets.7z` (324 MB) is **never committed** (over
 GitHub's 100 MB limit) — it lives on disk and is served by the LAN server.
+
+## House-rule lobby defaults (all variants)
+
+Applied to every variant (incl. ra2), so the engine bundle is "stock + these defaults":
+
+- **Every room starts clean** — the prefs read for the player's last country/color/start/
+  team and the host's saved game options returns nothing, so the lobby falls back to its
+  defaults (random slot, default options). In-room changes still work; they're just not
+  restored next room. (One anchor on the prefs `getItem`.)
+- **Superweapons off by default** in new games (`superWeapons:!0 → !1`, the 3 default sets).
+
+Remove these by deleting `lobby-defaults-no-restore` / `superweapons-off-by-default` from
+`PATCHES`. So `ra2` is no longer byte-identical to upstream stock — it carries these.
 
 ## Reliability: somewhat reliable, NOT 100%
 

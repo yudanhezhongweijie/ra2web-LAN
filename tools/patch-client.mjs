@@ -95,6 +95,27 @@ const PATCHES = [
     replace: "$1",
     expect: 1,
   },
+  // --- house-rule lobby defaults (all variants) ------------------------------
+  // Every room starts CLEAN: prefs reads for the player's last country/color/start/
+  // team and the host's saved game options return nothing, so the lobby falls back to
+  // its defaults (random slot, default options). In-room changes still work; they just
+  // aren't restored next room. Single anchor on the prefs getItem covers every site.
+  {
+    name: "lobby-defaults-no-restore",
+    variants: ["ra2", "yuri", "dual"],
+    find: /getItem\(e\)\{try\{return this\.storage\?\.getItem\(e\)\?\?void 0/g,
+    replace:
+      'getItem(e){if(["_r_lastCountry","_r_lastColor","_r_lastStartPos","_r_lastTeam","_r_hostOpts"].includes(e))return void 0;try{return this.storage?.getItem(e)??void 0',
+    expect: 1,
+  },
+  {
+    name: "superweapons-off-by-default",
+    variants: ["ra2", "yuri", "dual"],
+    // The three new-game default-option objects ship superWeapons ON; default them OFF.
+    find: /mcvRepacks:!0,cratesAppear:!0,superWeapons:!0/g,
+    replace: "mcvRepacks:!0,cratesAppear:!0,superWeapons:!1",
+    expect: 3,
+  },
   // --- EXPERIMENTAL / DISABLED -----------------------------------------------
   // The YR Eva-voice loading patch (engine===4 → load eva-ally/eva-sov via
   // appResourceLoader) is intentionally NOT enabled: the last hand-rolled version
