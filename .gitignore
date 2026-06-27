@@ -11,3 +11,6 @@ v2/ls/*.png
 yr-assets.7z
 *.stock
 assets/releases/*/werhd.min.js.*bak
+
+# downloaded map files (served off-disk, like yr-assets)
+maps/
